@@ -75,7 +75,7 @@ export function CalendarView({
                     allDay: event.all_day,
                     extendedProps: {
                         location: event.location,
-                        url: event.url,
+                        eventUrl: event.url,
                         notes: event.notes,
                     },
                 }))}
@@ -90,15 +90,15 @@ export function CalendarView({
                 {eventInfo.event.extendedProps.location}
               </span>
                         )}
-                        {eventInfo.event.extendedProps.url && (
+                        {eventInfo.event.extendedProps.eventUrl && (
                             <a
                                 className="event-url"
-                                href={toExternalUrl(eventInfo.event.extendedProps.url)}
+                                href={toExternalUrl(eventInfo.event.extendedProps.eventUrl)}
                                 target="_blank"
                                 rel="noreferrer"
                                 onClick={(event) => event.stopPropagation()}
                             >
-                                {eventInfo.event.extendedProps.url}
+                                {eventInfo.event.extendedProps.eventUrl}
                             </a>
                         )}
                     </div>

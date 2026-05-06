@@ -20,6 +20,7 @@ export function useCalendarEvents(token: string) {
             await loadEvents();
         } catch (error) {
             console.error("Failed to create event:", error);
+            throw error;
         }
     }
 
@@ -29,6 +30,7 @@ export function useCalendarEvents(token: string) {
             await loadEvents();
         } catch (error) {
             console.error("Failed to update event:", error);
+            throw error;
         }
     }
 

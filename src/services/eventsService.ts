@@ -8,10 +8,14 @@ function isMissingUrlColumnError(error: { code?: string; message?: string }) {
     );
 }
 
-function withoutUrl(payload: EventPayload) {
-    const payloadWithoutUrl = {...payload};
-    delete payloadWithoutUrl.url;
-    return payloadWithoutUrl;
+function getServiceError(error: { code?: string; message?: string }) {
+    if (isMissingUrlColumnError(error)) {
+        return new Error(
+            "La colonne url est absente de la table events. Exécute la migration Supabase avant d'enregistrer une URL."
+        );
+    }
+
+    return error;
 }
 
 export async function fetchEvents(token: string) {
@@ -29,30 +33,13 @@ export async function fetchEvents(token: string) {
 export async function createEvent(payload: EventPayload) {
     const {error} = await supabase.from("events").insert(payload);
 
-    if (error && payload.url && isMissingUrlColumnError(error)) {
-        console.warn("The events.url column is missing. Retrying without the URL field.");
-        const {error: retryError} = await supabase.from("events").insert(withoutUrl(payload));
-        if (retryError) throw retryError;
-        return;
-    }
-
-    if (error) throw error;
+    if (error) throw getServiceError(error);
 }
 
 export async function updateEvent(id: string, payload: EventPayload) {
     const {error} = await supabase.from("events").update(payload).eq("id", id);
 
-    if (error && payload.url && isMissingUrlColumnError(error)) {
-        console.warn("The events.url column is missing. Retrying without the URL field.");
-        const {error: retryError} = await supabase
-            .from("events")
-            .update(withoutUrl(payload))
-            .eq("id", id);
-        if (retryError) throw retryError;
-        return;
-    }
-
-    if (error) throw error;
+    if (error) throw getServiceError(error);
 }
 
 export async function deleteEventById(id: string) {

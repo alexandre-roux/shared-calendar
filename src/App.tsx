@@ -15,6 +15,7 @@ import {
 } from "./lib/dateUtils";
 import {useCalendarEvents} from "./hooks/useCalendarEvents";
 import {useIsMobile} from "./hooks/useIsMobile";
+import {toExternalUrl} from "./lib/urlUtils";
 import type {CalendarEvent, EditorPosition, EventForm, EventPayload,} from "./types/calendar";
 import "./App.css";
 
@@ -126,7 +127,7 @@ export default function App() {
                 ? buildDateTimeIso(form.endDate || form.startDate, form.endTime)
                 : buildDefaultEndDateTime(form.startDate, form.startTime);
 
-        const url = form.url.trim();
+        const url = toExternalUrl(form.url);
         const payload: EventPayload = {
             calendar_token: token,
             title: form.title.trim(),
@@ -138,10 +139,15 @@ export default function App() {
             notes: form.notes.trim() || null,
         };
 
-        if (editingEventId) {
-            await saveExistingEvent(editingEventId, payload);
-        } else {
-            await saveNewEvent(payload);
+        try {
+            if (editingEventId) {
+                await saveExistingEvent(editingEventId, payload);
+            } else {
+                await saveNewEvent(payload);
+            }
+        } catch (error) {
+            window.alert(error instanceof Error ? error.message : "Impossible d'enregistrer l'événement.");
+            return;
         }
 
         closeEditor();
