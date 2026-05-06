@@ -2,6 +2,7 @@ import {useMemo, useRef, useState} from "react";
 import FullCalendar from "@fullcalendar/react";
 import {CalendarHeader} from "./components/CalendarHeader";
 import {CalendarView} from "./components/CalendarView";
+import {EventDetails} from "./components/EventDetails";
 import {EventEditor} from "./components/EventEditor";
 import {
     addDays,
@@ -45,6 +46,7 @@ export default function App() {
 
     const [form, setForm] = useState<EventForm>(emptyForm);
     const [editingEventId, setEditingEventId] = useState<string | null>(null);
+    const [viewingEvent, setViewingEvent] = useState<CalendarEvent | null>(null);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [editorPosition, setEditorPosition] = useState<EditorPosition>(
         getCenteredEditorPosition()
@@ -74,13 +76,12 @@ export default function App() {
         setIsEditorOpen(true);
     }
 
-    function openEditEditor(calendarEvent: CalendarEvent, position: EditorPosition) {
+    function getFormFromEvent(calendarEvent: CalendarEvent): EventForm {
         const startDate = new Date(calendarEvent.start_at);
         const endDate = calendarEvent.end_at ? new Date(calendarEvent.end_at) : null;
         const startDateValue = toDateInputValue(startDate);
 
-        setEditingEventId(calendarEvent.id);
-        setForm({
+        return {
             title: calendarEvent.title,
             location: calendarEvent.location ?? "",
             url: calendarEvent.url ?? "",
@@ -94,15 +95,29 @@ export default function App() {
             endTime: !calendarEvent.all_day && endDate ? toTimeInputValue(endDate) : "",
             allDay: calendarEvent.all_day,
             notes: calendarEvent.notes ?? "",
-        });
+        };
+    }
+
+    function openEventDetails(calendarEvent: CalendarEvent, position: EditorPosition) {
+        setEditingEventId(null);
+        setViewingEvent(calendarEvent);
         setEditorPosition(position);
-        setIsEditorOpen(true);
     }
 
     function closeEditor() {
         setIsEditorOpen(false);
+        setViewingEvent(null);
         setEditingEventId(null);
         setForm(emptyForm);
+    }
+
+    function editViewingEvent() {
+        if (!viewingEvent) return;
+
+        setEditingEventId(viewingEvent.id);
+        setForm(getFormFromEvent(viewingEvent));
+        setViewingEvent(null);
+        setIsEditorOpen(true);
     }
 
     async function saveEvent() {
@@ -154,12 +169,13 @@ export default function App() {
     }
 
     async function deleteEvent() {
-        if (!editingEventId) return;
+        const eventId = editingEventId ?? viewingEvent?.id;
+        if (!eventId) return;
 
         const confirmed = window.confirm("Supprimer cet événement ?");
         if (!confirmed) return;
 
-        await removeEvent(editingEventId);
+        await removeEvent(eventId);
         closeEditor();
     }
 
@@ -174,10 +190,21 @@ export default function App() {
                     isMobile={isMobile}
                     onDatesSet={setCurrentTitle}
                     onCreateEvent={openCreateEditor}
-                    onEditEvent={openEditEditor}
+                    onEditEvent={openEventDetails}
                     onMoveEvent={moveEvent}
                 />
             </div>
+
+            {viewingEvent && (
+                <EventDetails
+                    event={viewingEvent}
+                    isMobile={isMobile}
+                    editorPosition={editorPosition}
+                    onClose={closeEditor}
+                    onEdit={editViewingEvent}
+                    onDelete={deleteEvent}
+                />
+            )}
 
             {isEditorOpen && (
                 <EventEditor

@@ -254,7 +254,8 @@
     }
 
     .editor-row input,
-    .editor-row textarea {
+    .editor-row textarea,
+    .readonly-link-field {
         min-height: 44px;
         background: #fff;
         box-shadow: inset 0 -1px 0 #dadce0;
@@ -281,6 +282,10 @@
 
     .quick-editor-actions {
         display: none;
+    }
+
+    .event-details-actions {
+        padding: 14px 20px 20px;
     }
 }
 

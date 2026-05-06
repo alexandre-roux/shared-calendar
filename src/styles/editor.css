@@ -274,3 +274,78 @@
 .quick-editor-actions .delete-button:hover {
     background: #fce8e6;
 }
+
+.event-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.event-details-body {
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 18px;
+    overflow-y: auto;
+}
+
+.event-details input,
+.event-details textarea {
+    background: #fff;
+    cursor: default;
+    pointer-events: none;
+}
+
+.event-details input:focus,
+.event-details textarea:focus {
+    box-shadow: none;
+}
+
+.readonly-link-field {
+    width: 100%;
+    min-height: 40px;
+    padding: 8px 10px;
+    border-radius: 4px;
+    background: #fff;
+    box-sizing: border-box;
+    color: #202124;
+}
+
+.readonly-link-field {
+    color: #1a73e8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.readonly-link-field:hover {
+    text-decoration: underline;
+}
+
+.event-details-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 24px 20px;
+}
+
+.event-details-actions button {
+    height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 4px;
+    background: transparent;
+    color: #1a73e8;
+    font-weight: 500;
+}
+
+.event-details-actions button:hover {
+    background: #f1f3f4;
+}
+
+.event-details-actions .delete-button {
+    color: #d93025;
+}
+
+.event-details-actions .delete-button:hover {
+    background: #fce8e6;
+}

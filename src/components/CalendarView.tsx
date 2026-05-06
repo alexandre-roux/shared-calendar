@@ -12,7 +12,6 @@ import {
     toDateInputValue,
     toTimeInputValue,
 } from "../lib/dateUtils";
-import {toExternalUrl} from "../lib/urlUtils";
 
 type CalendarViewProps = {
     calendarRef: RefObject<FullCalendar | null>;
@@ -85,22 +84,6 @@ export function CalendarView({
                             <span className="event-time">{eventInfo.timeText}</span>
                         )}
                         <span className="event-title">{eventInfo.event.title}</span>
-                        {eventInfo.event.extendedProps.location && (
-                            <span className="event-location">
-                {eventInfo.event.extendedProps.location}
-              </span>
-                        )}
-                        {eventInfo.event.extendedProps.eventUrl && (
-                            <a
-                                className="event-url"
-                                href={toExternalUrl(eventInfo.event.extendedProps.eventUrl)}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(event) => event.stopPropagation()}
-                            >
-                                {eventInfo.event.extendedProps.eventUrl}
-                            </a>
-                        )}
                     </div>
                 )}
                 dateClick={(info) => {
