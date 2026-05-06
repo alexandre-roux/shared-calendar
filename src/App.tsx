@@ -2,9 +2,7 @@ import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import type {DateClickArg, EventResizeDoneArg} from "@fullcalendar/interaction";
 import interactionPlugin from "@fullcalendar/interaction";
-import type {DateSelectArg, EventClickArg, EventDropArg} from "@fullcalendar/core";
 import {createClient} from "@supabase/supabase-js";
 import "./App.css";
 
@@ -20,14 +18,17 @@ type CalendarEvent = {
     start_at: string;
     end_at: string | null;
     notes: string | null;
+    all_day: boolean;
 };
 
 type EventForm = {
     title: string;
     location: string;
-    date: string;
+    startDate: string;
     startTime: string;
+    endDate: string;
     endTime: string;
+    allDay: boolean;
     notes: string;
 };
 
@@ -39,9 +40,11 @@ type EditorPosition = {
 const emptyForm: EventForm = {
     title: "",
     location: "",
-    date: "",
+    startDate: "",
     startTime: "",
+    endDate: "",
     endTime: "",
+    allDay: false,
     notes: "",
 };
 
@@ -58,21 +61,36 @@ function toTimeInputValue(date: Date) {
 }
 
 function buildDateTime(date: string, time: string) {
-    return time ? `${date}T${time}:00` : date;
+    return time ? `${date}T${time}:00` : `${date}T00:00:00`;
 }
 
-function buildDefaultEndTime(date: string, startTime: string) {
+function addDays(date: string, days: number) {
+    const value = new Date(`${date}T00:00:00`);
+    value.setDate(value.getDate() + days);
+    return toDateInputValue(value);
+}
+
+function buildDefaultEndDateTime(startDate: string, startTime: string) {
     if (!startTime) return null;
 
-    const startDate = new Date(buildDateTime(date, startTime));
-    startDate.setHours(startDate.getHours() + 1);
+    const value = new Date(buildDateTime(startDate, startTime));
+    value.setHours(value.getHours() + 1);
 
-    return `${toDateInputValue(startDate)}T${toTimeInputValue(startDate)}:00`;
+    return `${toDateInputValue(value)}T${toTimeInputValue(value)}:00`;
+}
+
+function getInclusiveAllDayEndDate(endAt: string | null, startDate: string) {
+    if (!endAt) return startDate;
+
+    const endDate = new Date(endAt);
+    endDate.setDate(endDate.getDate() - 1);
+
+    return toDateInputValue(endDate);
 }
 
 function getEditorPosition(clientX: number, clientY: number): EditorPosition {
     const editorWidth = 448;
-    const editorHeight = 520;
+    const editorHeight = 560;
     const margin = 16;
 
     const left = Math.min(
@@ -153,13 +171,17 @@ export default function App() {
         position: EditorPosition
     ) {
         const hasTime = date.getHours() !== 0 || date.getMinutes() !== 0;
+        const startDate = toDateInputValue(date);
+        const finalEndDate = endDate ? toDateInputValue(endDate) : startDate;
 
         setEditingEventId(null);
         setForm({
             ...emptyForm,
-            date: toDateInputValue(date),
+            startDate,
+            endDate: finalEndDate,
             startTime: hasTime ? toTimeInputValue(date) : "",
             endTime: endDate && hasTime ? toTimeInputValue(endDate) : "",
+            allDay: !hasTime,
         });
         setEditorPosition(position);
         setIsEditorOpen(true);
@@ -171,14 +193,21 @@ export default function App() {
     ) {
         const startDate = new Date(calendarEvent.start_at);
         const endDate = calendarEvent.end_at ? new Date(calendarEvent.end_at) : null;
+        const startDateValue = toDateInputValue(startDate);
 
         setEditingEventId(calendarEvent.id);
         setForm({
             title: calendarEvent.title,
             location: calendarEvent.location ?? "",
-            date: toDateInputValue(startDate),
-            startTime: toTimeInputValue(startDate),
-            endTime: endDate ? toTimeInputValue(endDate) : "",
+            startDate: startDateValue,
+            startTime: calendarEvent.all_day ? "" : toTimeInputValue(startDate),
+            endDate: calendarEvent.all_day
+                ? getInclusiveAllDayEndDate(calendarEvent.end_at, startDateValue)
+                : endDate
+                    ? toDateInputValue(endDate)
+                    : startDateValue,
+            endTime: !calendarEvent.all_day && endDate ? toTimeInputValue(endDate) : "",
+            allDay: calendarEvent.all_day,
             notes: calendarEvent.notes ?? "",
         });
         setEditorPosition(position);
@@ -192,12 +221,17 @@ export default function App() {
     }
 
     async function saveEvent() {
-        if (!form.title.trim() || !form.date) return;
+        if (!form.title.trim() || !form.startDate) return;
 
-        const startAt = buildDateTime(form.date, form.startTime);
-        const endAt = form.endTime
-            ? buildDateTime(form.date, form.endTime)
-            : buildDefaultEndTime(form.date, form.startTime);
+        const startAt = form.allDay
+            ? `${form.startDate}T00:00:00`
+            : buildDateTime(form.startDate, form.startTime);
+
+        const endAt = form.allDay
+            ? `${addDays(form.endDate || form.startDate, 1)}T00:00:00`
+            : form.endTime
+                ? buildDateTime(form.endDate || form.startDate, form.endTime)
+                : buildDefaultEndDateTime(form.startDate, form.startTime);
 
         const eventData = {
             calendar_token: token,
@@ -205,6 +239,7 @@ export default function App() {
             location: form.location.trim() || null,
             start_at: startAt,
             end_at: endAt,
+            all_day: form.allDay,
             notes: form.notes.trim() || null,
         };
 
@@ -241,7 +276,12 @@ export default function App() {
         await loadEvents();
     }
 
-    async function updateEventDate(eventId: string, start: Date | null, end: Date | null) {
+    async function updateEventDate(
+        eventId: string,
+        start: Date | null,
+        end: Date | null,
+        allDay: boolean
+    ) {
         if (!start) return;
 
         const {error} = await supabase
@@ -249,6 +289,7 @@ export default function App() {
             .update({
                 start_at: start.toISOString(),
                 end_at: end?.toISOString() ?? null,
+                all_day: allDay,
             })
             .eq("id", eventId);
 
@@ -262,6 +303,8 @@ export default function App() {
     }
 
     useEffect(() => {
+        // Loading events updates local state after the async Supabase request.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadEvents();
     }, [loadEvents]);
 
@@ -270,7 +313,7 @@ export default function App() {
             <header className="top-bar">
                 <div className="brand-area">
                     <div className="calendar-logo">31</div>
-                    <span className="brand-title">Calendrier de Il se passe quoi</span>
+                    <span className="brand-title">Calendrier de il se passe quoi</span>
                 </div>
 
                 <div className="navigation-area">
@@ -279,10 +322,10 @@ export default function App() {
                     </button>
 
                     <div className="nav-buttons">
-                        <button aria-label="Mois précédent" onClick={() => getCalendarApi()?.prev()}>
+                        <button aria-label="Période précédente" onClick={() => getCalendarApi()?.prev()}>
                             ‹
                         </button>
-                        <button aria-label="Mois suivant" onClick={() => getCalendarApi()?.next()}>
+                        <button aria-label="Période suivante" onClick={() => getCalendarApi()?.next()}>
                             ›
                         </button>
                     </div>
@@ -296,7 +339,7 @@ export default function App() {
                     <FullCalendar
                         ref={calendarRef}
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                        initialView={isMobile ? "dayGridMonth" : "dayGridMonth"}
+                        initialView="dayGridMonth"
                         locale="fr"
                         height="100%"
                         firstDay={1}
@@ -325,6 +368,7 @@ export default function App() {
                             title: event.title,
                             start: event.start_at,
                             end: event.end_at ?? undefined,
+                            allDay: event.all_day,
                             extendedProps: {
                                 location: event.location,
                                 notes: event.notes,
@@ -343,7 +387,7 @@ export default function App() {
                                 )}
                             </div>
                         )}
-                        dateClick={(info: DateClickArg) => {
+                        dateClick={(info) => {
                             openCreateEditor(
                                 info.date,
                                 null,
@@ -352,14 +396,16 @@ export default function App() {
                                     : getEditorPosition(info.jsEvent.clientX, info.jsEvent.clientY)
                             );
                         }}
-                        select={(info: DateSelectArg) => {
+                        select={(info) => {
                             openCreateEditor(
                                 info.start,
                                 info.end,
-                                getCenteredEditorPosition()
+                                isMobile
+                                    ? getCenteredEditorPosition()
+                                    : getCenteredEditorPosition()
                             );
                         }}
-                        eventClick={(info: EventClickArg) => {
+                        eventClick={(info) => {
                             const calendarEvent = events.find((event) => event.id === info.event.id);
                             if (!calendarEvent) return;
 
@@ -370,11 +416,21 @@ export default function App() {
                                     : getEditorPosition(info.jsEvent.clientX, info.jsEvent.clientY)
                             );
                         }}
-                        eventDrop={(info: EventDropArg) => {
-                            updateEventDate(info.event.id, info.event.start, info.event.end);
+                        eventDrop={(info) => {
+                            updateEventDate(
+                                info.event.id,
+                                info.event.start,
+                                info.event.end,
+                                info.event.allDay
+                            );
                         }}
-                        eventResize={(info: EventResizeDoneArg) => {
-                            updateEventDate(info.event.id, info.event.start, info.event.end);
+                        eventResize={(info) => {
+                            updateEventDate(
+                                info.event.id,
+                                info.event.start,
+                                info.event.end,
+                                info.event.allDay
+                            );
                         }}
                     />
                 </main>
@@ -395,8 +451,18 @@ export default function App() {
                         onClick={(event) => event.stopPropagation()}
                     >
                         <div className="quick-editor-header">
-                            <button className="header-icon-button" aria-label="Fermer" onClick={closeEditor}>
+                            <button
+                                className="header-close-button"
+                                aria-label="Fermer"
+                                onClick={closeEditor}
+                            >
                                 ×
+                            </button>
+
+                            <div className="quick-editor-header-spacer"/>
+
+                            <button className="header-save-button" onClick={saveEvent}>
+                                Enregistrer
                             </button>
                         </div>
 
@@ -413,35 +479,74 @@ export default function App() {
 
                             <div className="editor-row">
                                 <span className="row-icon">🕒</span>
-                                <div className="date-time-fields">
-                                    <input
-                                        type="date"
-                                        value={form.date}
-                                        onChange={(event) =>
-                                            setForm({...form, date: event.target.value})
-                                        }
-                                    />
-                                    <input
-                                        type="time"
-                                        value={form.startTime}
-                                        onChange={(event) =>
-                                            setForm({...form, startTime: event.target.value})
-                                        }
-                                    />
-                                    <input
-                                        type="time"
-                                        value={form.endTime}
-                                        onChange={(event) =>
-                                            setForm({...form, endTime: event.target.value})
-                                        }
-                                    />
+
+                                <div className="date-time-section">
+                                    <label className="all-day-row">
+                                        <span>Toute la journée</span>
+                                        <input
+                                            type="checkbox"
+                                            checked={form.allDay}
+                                            onChange={(event) =>
+                                                setForm({
+                                                    ...form,
+                                                    allDay: event.target.checked,
+                                                    startTime: event.target.checked ? "" : form.startTime,
+                                                    endTime: event.target.checked ? "" : form.endTime,
+                                                })
+                                            }
+                                        />
+                                    </label>
+
+                                    <div className="date-time-row">
+                                        <input
+                                            type="date"
+                                            value={form.startDate}
+                                            onChange={(event) =>
+                                                setForm({
+                                                    ...form,
+                                                    startDate: event.target.value,
+                                                    endDate: form.endDate || event.target.value,
+                                                })
+                                            }
+                                        />
+
+                                        {!form.allDay && (
+                                            <input
+                                                type="time"
+                                                value={form.startTime}
+                                                onChange={(event) =>
+                                                    setForm({...form, startTime: event.target.value})
+                                                }
+                                            />
+                                        )}
+                                    </div>
+
+                                    <div className="date-time-row">
+                                        <input
+                                            type="date"
+                                            value={form.endDate}
+                                            onChange={(event) =>
+                                                setForm({...form, endDate: event.target.value})
+                                            }
+                                        />
+
+                                        {!form.allDay && (
+                                            <input
+                                                type="time"
+                                                value={form.endTime}
+                                                onChange={(event) =>
+                                                    setForm({...form, endTime: event.target.value})
+                                                }
+                                            />
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
                             <div className="editor-row">
                                 <span className="row-icon">📍</span>
                                 <input
-                                    placeholder="Ajouter un lieu"
+                                    placeholder="Lieu"
                                     value={form.location}
                                     onChange={(event) =>
                                         setForm({...form, location: event.target.value})
@@ -452,13 +557,19 @@ export default function App() {
                             <div className="editor-row">
                                 <span className="row-icon">☰</span>
                                 <textarea
-                                    placeholder="Ajouter une description"
+                                    placeholder="Notes"
                                     value={form.notes}
                                     onChange={(event) =>
                                         setForm({...form, notes: event.target.value})
                                     }
                                 />
                             </div>
+
+                            {editingEventId && (
+                                <button className="mobile-delete-button" onClick={deleteEvent}>
+                                    Supprimer l'événement
+                                </button>
+                            )}
                         </div>
 
                         <footer className="quick-editor-actions">
