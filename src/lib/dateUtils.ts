@@ -16,6 +16,37 @@ export function buildDateTime(date: string, time: string) {
     return time ? `${date}T${time}:00` : `${date}T00:00:00`;
 }
 
+export function buildDateTimeIso(date: string, time: string) {
+    return new Date(buildDateTime(date, time)).toISOString();
+}
+
+export function isDateBeforeToday(date: Date) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const value = new Date(date);
+    value.setHours(0, 0, 0, 0);
+
+    return value < today;
+}
+
+export function isEventStartInPast(date: string, time: string, allDay: boolean) {
+    if (!date) return false;
+
+    if (allDay) {
+        return date < toDateInputValue(new Date());
+    }
+
+    return new Date(buildDateTime(date, time)) < new Date();
+}
+
+export function addOneHourIso(date: string, time: string) {
+    const value = new Date(buildDateTime(date, time));
+    value.setHours(value.getHours() + 1);
+
+    return value.toISOString();
+}
+
 export function addDays(date: string, days: number) {
     const value = new Date(`${date}T00:00:00`);
     value.setDate(value.getDate() + days);
@@ -23,12 +54,7 @@ export function addDays(date: string, days: number) {
 }
 
 export function buildDefaultEndDateTime(startDate: string, startTime: string) {
-    if (!startTime) return null;
-
-    const value = new Date(buildDateTime(startDate, startTime));
-    value.setHours(value.getHours() + 1);
-
-    return `${toDateInputValue(value)}T${toTimeInputValue(value)}:00`;
+    return addOneHourIso(startDate, startTime);
 }
 
 export function getInclusiveAllDayEndDate(endAt: string | null, startDate: string) {

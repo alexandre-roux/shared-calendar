@@ -5,6 +5,7 @@ type EventEditorProps = {
     isMobile: boolean;
     isEditing: boolean;
     editorPosition: EditorPosition;
+    minStartDate?: string;
     onChangeForm: (form: EventForm) => void;
     onClose: () => void;
     onSave: () => void;
@@ -16,6 +17,7 @@ export function EventEditor({
                                 isMobile,
                                 isEditing,
                                 editorPosition,
+                                minStartDate,
                                 onChangeForm,
                                 onClose,
                                 onSave,
@@ -51,6 +53,7 @@ export function EventEditor({
                     <input
                         className="title-field"
                         autoFocus
+                        required
                         placeholder="Ajouter un titre"
                         value={form.title}
                         onChange={(event) =>
@@ -85,6 +88,8 @@ export function EventEditor({
                             <div className="date-time-row">
                                 <input
                                     type="date"
+                                    min={minStartDate}
+                                    required
                                     value={form.startDate}
                                     onChange={(event) =>
                                         onChangeForm({
@@ -100,6 +105,7 @@ export function EventEditor({
                                         <span className="time-field-icon" aria-hidden="true">🕒</span>
                                         <input
                                             type="time"
+                                            required={!form.allDay}
                                             value={form.startTime}
                                             onChange={(event) =>
                                                 onChangeForm({...form, startTime: event.target.value})
@@ -112,6 +118,7 @@ export function EventEditor({
                             <div className="date-time-row">
                                 <input
                                     type="date"
+                                    min={form.startDate || minStartDate}
                                     value={form.endDate}
                                     onChange={(event) =>
                                         onChangeForm({...form, endDate: event.target.value})
@@ -141,6 +148,18 @@ export function EventEditor({
                             value={form.location}
                             onChange={(event) =>
                                 onChangeForm({...form, location: event.target.value})
+                            }
+                        />
+                    </div>
+
+                    <div className="editor-row">
+                        <span className="row-icon">🔗</span>
+                        <input
+                            type="url"
+                            placeholder="URL"
+                            value={form.url}
+                            onChange={(event) =>
+                                onChangeForm({...form, url: event.target.value})
                             }
                         />
                     </div>

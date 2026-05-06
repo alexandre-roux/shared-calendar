@@ -2,6 +2,7 @@ export type CalendarEvent = {
     id: string;
     title: string;
     location: string | null;
+    url: string | null;
     start_at: string;
     end_at: string | null;
     notes: string | null;
@@ -11,6 +12,7 @@ export type CalendarEvent = {
 export type EventForm = {
     title: string;
     location: string;
+    url: string;
     startDate: string;
     startTime: string;
     endDate: string;
@@ -28,6 +30,7 @@ export type EventPayload = {
     calendar_token: string;
     title: string;
     location: string | null;
+    url?: string | null;
     start_at: string;
     end_at: string | null;
     all_day: boolean;

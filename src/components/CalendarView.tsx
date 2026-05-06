@@ -4,7 +4,15 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import type {CalendarEvent, EditorPosition,} from "../types/calendar";
-import {getCenteredEditorPosition, getEditorPosition,} from "../lib/dateUtils";
+import {
+    getCenteredEditorPosition,
+    getEditorPosition,
+    isDateBeforeToday,
+    isEventStartInPast,
+    toDateInputValue,
+    toTimeInputValue,
+} from "../lib/dateUtils";
+import {toExternalUrl} from "../lib/urlUtils";
 
 type CalendarViewProps = {
     calendarRef: RefObject<FullCalendar | null>;
@@ -67,6 +75,7 @@ export function CalendarView({
                     allDay: event.all_day,
                     extendedProps: {
                         location: event.location,
+                        url: event.url,
                         notes: event.notes,
                     },
                 }))}
@@ -81,9 +90,31 @@ export function CalendarView({
                 {eventInfo.event.extendedProps.location}
               </span>
                         )}
+                        {eventInfo.event.extendedProps.url && (
+                            <a
+                                className="event-url"
+                                href={toExternalUrl(eventInfo.event.extendedProps.url)}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(event) => event.stopPropagation()}
+                            >
+                                {eventInfo.event.extendedProps.url}
+                            </a>
+                        )}
                     </div>
                 )}
                 dateClick={(info) => {
+                    if (
+                        isDateBeforeToday(info.date) ||
+                        isEventStartInPast(
+                            toDateInputValue(info.date),
+                            info.allDay ? "" : toTimeInputValue(info.date),
+                            info.allDay
+                        )
+                    ) {
+                        return;
+                    }
+
                     onCreateEvent(
                         info.date,
                         null,
@@ -93,6 +124,17 @@ export function CalendarView({
                     );
                 }}
                 select={(info) => {
+                    if (
+                        isDateBeforeToday(info.start) ||
+                        isEventStartInPast(
+                            toDateInputValue(info.start),
+                            info.allDay ? "" : toTimeInputValue(info.start),
+                            info.allDay
+                        )
+                    ) {
+                        return;
+                    }
+
                     onCreateEvent(info.start, info.end, getCenteredEditorPosition());
                 }}
                 eventClick={(info) => {

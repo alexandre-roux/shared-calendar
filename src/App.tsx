@@ -5,10 +5,11 @@ import {CalendarView} from "./components/CalendarView";
 import {EventEditor} from "./components/EventEditor";
 import {
     addDays,
-    buildDateTime,
+    buildDateTimeIso,
     buildDefaultEndDateTime,
     getCenteredEditorPosition,
     getInclusiveAllDayEndDate,
+    isEventStartInPast,
     toDateInputValue,
     toTimeInputValue,
 } from "./lib/dateUtils";
@@ -20,6 +21,7 @@ import "./App.css";
 const emptyForm: EventForm = {
     title: "",
     location: "",
+    url: "",
     startDate: "",
     startTime: "",
     endDate: "",
@@ -47,6 +49,7 @@ export default function App() {
         getCenteredEditorPosition()
     );
     const [currentTitle, setCurrentTitle] = useState("");
+    const today = toDateInputValue(new Date());
 
     function openCreateEditor(
         date: Date,
@@ -79,6 +82,7 @@ export default function App() {
         setForm({
             title: calendarEvent.title,
             location: calendarEvent.location ?? "",
+            url: calendarEvent.url ?? "",
             startDate: startDateValue,
             startTime: calendarEvent.all_day ? "" : toTimeInputValue(startDate),
             endDate: calendarEvent.all_day
@@ -102,21 +106,32 @@ export default function App() {
 
     async function saveEvent() {
         if (!form.title.trim() || !form.startDate) return;
+        if (!form.allDay && !form.startTime) {
+            window.alert("Veuillez saisir une heure de début ou cocher Toute la journée.");
+            return;
+        }
+
+        if (!editingEventId && isEventStartInPast(form.startDate, form.startTime, form.allDay)) {
+            window.alert("Impossible d'ajouter un événement dans le passé.");
+            return;
+        }
 
         const startAt = form.allDay
             ? `${form.startDate}T00:00:00`
-            : buildDateTime(form.startDate, form.startTime);
+            : buildDateTimeIso(form.startDate, form.startTime);
 
         const endAt = form.allDay
             ? `${addDays(form.endDate || form.startDate, 1)}T00:00:00`
             : form.endTime
-                ? buildDateTime(form.endDate || form.startDate, form.endTime)
+                ? buildDateTimeIso(form.endDate || form.startDate, form.endTime)
                 : buildDefaultEndDateTime(form.startDate, form.startTime);
 
+        const url = form.url.trim();
         const payload: EventPayload = {
             calendar_token: token,
             title: form.title.trim(),
             location: form.location.trim() || null,
+            ...(url ? {url} : {}),
             start_at: startAt,
             end_at: endAt,
             all_day: form.allDay,
@@ -164,6 +179,7 @@ export default function App() {
                     isMobile={isMobile}
                     isEditing={Boolean(editingEventId)}
                     editorPosition={editorPosition}
+                    minStartDate={editingEventId ? undefined : today}
                     onChangeForm={setForm}
                     onClose={closeEditor}
                     onSave={saveEvent}

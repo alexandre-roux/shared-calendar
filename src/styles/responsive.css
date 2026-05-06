@@ -245,7 +245,7 @@
     }
 
     .date-time-row input[type="time"] {
-        text-align: right;
+        text-align: left;
     }
 
     .editor-row {

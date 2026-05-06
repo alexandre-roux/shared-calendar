@@ -82,6 +82,7 @@ create table events
     calendar_token text        not null,
     title          text        not null,
     location       text,
+    url            text,
     start_at       timestamptz not null,
     end_at         timestamptz,
     notes          text,
@@ -111,6 +112,12 @@ create
 policy "Public delete events"
 on events for delete
 using (true);
+```
+
+For an existing database, add the column with:
+
+```sql
+alter table events add column if not exists url text;
 ```
 
 ## Deployment
