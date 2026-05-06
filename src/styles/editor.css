@@ -292,6 +292,7 @@
     background: #fff;
     cursor: default;
     pointer-events: none;
+    text-align: left;
 }
 
 .event-details input:focus,
@@ -300,6 +301,9 @@
 }
 
 .readonly-link-field {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
     width: 100%;
     min-height: 40px;
     padding: 8px 10px;
@@ -312,6 +316,7 @@
 .readonly-link-field {
     color: #1a73e8;
     overflow: hidden;
+    text-align: left;
     text-overflow: ellipsis;
     text-decoration: none;
     white-space: nowrap;
