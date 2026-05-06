@@ -1,73 +1,134 @@
-# React + TypeScript + Vite
+# Shared Calendar
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple collaborative calendar built with React, FullCalendar and Supabase.
 
-Currently, two official plugins are available:
+The goal of this project is to provide a lightweight shared calendar that can be accessed and edited by anyone who has
+the secret URL.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
 
-## React Compiler
+- Shared calendar with secret URL tokens
+- Create events directly from the calendar
+- Real-time persistence with Supabase
+- Multiple independent calendars using URL tokens
+- Month calendar view
+- Monday as first day of the week
+- Simple deployment with Vercel
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Tech Stack
 
-## Expanding the ESLint configuration
+- React
+- Vite
+- TypeScript
+- FullCalendar
+- Supabase
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Local Development
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Requirements
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Node.js
+- Yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Install dependencies
+
+```bash
+yarn
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Create a `.env` file at the root of the project:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
 ```
+
+## Run the project
+
+```bash
+yarn dev
+```
+
+The application will be available at:
+
+```txt
+http://localhost:5173
+```
+
+## Shared calendars
+
+Each URL token creates an independent calendar.
+
+Example:
+
+```txt
+http://localhost:5173/?token=friends
+```
+
+```txt
+http://localhost:5173/?token=vacation
+```
+
+## Database Setup
+
+Run the following SQL in Supabase:
+
+```sql
+create table events
+(
+    id             uuid primary key default gen_random_uuid(),
+    calendar_token text        not null,
+    title          text        not null,
+    location       text,
+    start_at       timestamptz not null,
+    end_at         timestamptz,
+    notes          text,
+    created_at     timestamptz      default now()
+);
+
+alter table events enable row level security;
+
+create
+policy "Public read events"
+on events for
+select
+    using (true);
+
+create
+policy "Public insert events"
+on events for insert
+with check (true);
+
+create
+policy "Public update events"
+on events for
+update
+    using (true);
+
+create
+policy "Public delete events"
+on events for delete
+using (true);
+```
+
+## Deployment
+
+The easiest way to deploy the project is with Vercel.
+
+1. Push the project to GitHub
+2. Import the repository into Vercel
+3. Add the environment variables
+4. Deploy
+
+## Important
+
+Anyone with the calendar URL can:
+
+- view events
+- create events
+- edit events
+- delete events
+
+Only share calendar URLs with trusted people.
