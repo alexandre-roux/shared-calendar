@@ -1,0 +1,173 @@
+import type {EditorPosition, EventForm} from "../types/calendar";
+
+type EventEditorProps = {
+    form: EventForm;
+    isMobile: boolean;
+    isEditing: boolean;
+    editorPosition: EditorPosition;
+    onChangeForm: (form: EventForm) => void;
+    onClose: () => void;
+    onSave: () => void;
+    onDelete: () => void;
+};
+
+export function EventEditor({
+                                form,
+                                isMobile,
+                                isEditing,
+                                editorPosition,
+                                onChangeForm,
+                                onClose,
+                                onSave,
+                                onDelete,
+                            }: EventEditorProps) {
+    return (
+        <div className="editor-layer" onClick={onClose}>
+            <section
+                className="quick-editor"
+                style={
+                    isMobile
+                        ? undefined
+                        : {
+                            left: `${editorPosition.left}px`,
+                            top: `${editorPosition.top}px`,
+                        }
+                }
+                onClick={(event) => event.stopPropagation()}
+            >
+                <div className="quick-editor-header">
+                    <button className="header-close-button" aria-label="Fermer" onClick={onClose}>
+                        ×
+                    </button>
+
+                    <div className="quick-editor-header-spacer"/>
+
+                    <button className="header-save-button" onClick={onSave}>
+                        Enregistrer
+                    </button>
+                </div>
+
+                <div className="quick-editor-body">
+                    <input
+                        className="title-field"
+                        autoFocus
+                        placeholder="Ajouter un titre"
+                        value={form.title}
+                        onChange={(event) =>
+                            onChangeForm({...form, title: event.target.value})
+                        }
+                    />
+
+                    <div className="editor-row">
+                        <span className="row-icon">🕒</span>
+
+                        <div className="date-time-section">
+                            <label className="all-day-row">
+                                <span>Toute la journée</span>
+                                <input
+                                    type="checkbox"
+                                    checked={form.allDay}
+                                    onChange={(event) =>
+                                        onChangeForm({
+                                            ...form,
+                                            allDay: event.target.checked,
+                                            startTime: event.target.checked ? "" : form.startTime,
+                                            endTime: event.target.checked ? "" : form.endTime,
+                                        })
+                                    }
+                                />
+                            </label>
+
+                            <div className="date-time-row">
+                                <input
+                                    type="date"
+                                    value={form.startDate}
+                                    onChange={(event) =>
+                                        onChangeForm({
+                                            ...form,
+                                            startDate: event.target.value,
+                                            endDate: form.endDate || event.target.value,
+                                        })
+                                    }
+                                />
+
+                                {!form.allDay && (
+                                    <input
+                                        type="time"
+                                        value={form.startTime}
+                                        onChange={(event) =>
+                                            onChangeForm({...form, startTime: event.target.value})
+                                        }
+                                    />
+                                )}
+                            </div>
+
+                            <div className="date-time-row">
+                                <input
+                                    type="date"
+                                    value={form.endDate}
+                                    onChange={(event) =>
+                                        onChangeForm({...form, endDate: event.target.value})
+                                    }
+                                />
+
+                                {!form.allDay && (
+                                    <input
+                                        type="time"
+                                        value={form.endTime}
+                                        onChange={(event) =>
+                                            onChangeForm({...form, endTime: event.target.value})
+                                        }
+                                    />
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="editor-row">
+                        <span className="row-icon">📍</span>
+                        <input
+                            placeholder="Lieu"
+                            value={form.location}
+                            onChange={(event) =>
+                                onChangeForm({...form, location: event.target.value})
+                            }
+                        />
+                    </div>
+
+                    <div className="editor-row">
+                        <span className="row-icon">☰</span>
+                        <textarea
+                            placeholder="Notes"
+                            value={form.notes}
+                            onChange={(event) =>
+                                onChangeForm({...form, notes: event.target.value})
+                            }
+                        />
+                    </div>
+
+                    {isEditing && (
+                        <button className="mobile-delete-button" onClick={onDelete}>
+                            Supprimer l'événement
+                        </button>
+                    )}
+                </div>
+
+                <footer className="quick-editor-actions">
+                    {isEditing && (
+                        <button className="delete-button" onClick={onDelete}>
+                            Supprimer
+                        </button>
+                    )}
+
+                    <button className="cancel-button" onClick={onClose}>
+                        Annuler
+                    </button>
+                    <button className="save-button" onClick={onSave}>
+                        Enregistrer
+                    </button>
+                </footer>
+            </section>
+        </div>
+    );
+}
