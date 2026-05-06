@@ -33,7 +33,7 @@ button {
 
 .top-bar {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
     gap: 16px;
     height: 64px;
@@ -45,7 +45,6 @@ button {
 
 .brand-area,
 .navigation-area,
-.view-switcher,
 .nav-buttons {
     display: flex;
     align-items: center;
@@ -137,36 +136,6 @@ button {
     font-size: 22px;
     font-weight: 400;
     white-space: nowrap;
-}
-
-.view-switcher {
-    overflow: hidden;
-    border: 1px solid #dadce0;
-    border-radius: 18px;
-    flex-shrink: 0;
-}
-
-.view-switcher button {
-    height: 36px;
-    padding: 0 14px;
-    border: 0;
-    border-right: 1px solid #dadce0;
-    background: #fff;
-    color: #3c4043;
-    font-weight: 500;
-}
-
-.view-switcher button:last-child {
-    border-right: 0;
-}
-
-.view-switcher button:hover {
-    background: #f8fafd;
-}
-
-.view-switcher button.active {
-    background: #e8f0fe;
-    color: #1967d2;
 }
 
 .calendar-layout {
@@ -505,10 +474,6 @@ button {
         gap: 8px;
     }
 
-    .view-switcher {
-        grid-column: 2;
-    }
-
     .today-button {
         padding: 0 12px;
     }
@@ -547,7 +512,19 @@ button {
     .navigation-area {
         display: grid;
         grid-template-columns: auto auto 1fr;
+        align-items: center;
+        gap: 8px;
         width: 100%;
+        min-width: 0;
+    }
+
+    .current-title {
+        justify-self: start;
+        min-width: 0;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        font-size: 16px;
     }
 
     .today-button {
@@ -559,23 +536,6 @@ button {
     .nav-buttons button {
         width: 32px;
         height: 32px;
-    }
-
-    .current-title {
-        justify-self: end;
-        font-size: 17px;
-    }
-
-    .view-switcher {
-        justify-self: stretch;
-        width: 100%;
-    }
-
-    .view-switcher button {
-        flex: 1;
-        height: 34px;
-        padding: 0 8px;
-        font-size: 13px;
     }
 
     .fc {

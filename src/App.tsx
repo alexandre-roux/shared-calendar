@@ -127,7 +127,6 @@ export default function App() {
         getCenteredEditorPosition()
     );
     const [currentTitle, setCurrentTitle] = useState("");
-    const [currentView, setCurrentView] = useState("dayGridMonth");
 
     const loadEvents = useCallback(async () => {
         const { data, error } = await supabase
@@ -262,11 +261,6 @@ export default function App() {
         await loadEvents();
     }
 
-    function changeView(viewName: string) {
-        getCalendarApi()?.changeView(viewName);
-        setCurrentView(viewName);
-    }
-
     useEffect(() => {
         loadEvents();
     }, [loadEvents]);
@@ -276,7 +270,7 @@ export default function App() {
             <header className="top-bar">
                 <div className="brand-area">
                     <div className="calendar-logo">31</div>
-                    <span className="brand-title">Calendrier de il se passe quoi</span>
+                    <span className="brand-title">Calendrier de Il se passe quoi</span>
                 </div>
 
                 <div className="navigation-area">
@@ -294,27 +288,6 @@ export default function App() {
                     </div>
 
                     <h1 className="current-title">{currentTitle}</h1>
-                </div>
-
-                <div className="view-switcher">
-                    <button
-                        className={currentView === "dayGridMonth" ? "active" : ""}
-                        onClick={() => changeView("dayGridMonth")}
-                    >
-                        Mois
-                    </button>
-                    <button
-                        className={currentView === "timeGridWeek" ? "active" : ""}
-                        onClick={() => changeView("timeGridWeek")}
-                    >
-                        Semaine
-                    </button>
-                    <button
-                        className={currentView === "timeGridDay" ? "active" : ""}
-                        onClick={() => changeView("timeGridDay")}
-                    >
-                        Jour
-                    </button>
                 </div>
             </header>
 
@@ -346,7 +319,6 @@ export default function App() {
                         headerToolbar={false}
                         datesSet={(info) => {
                             setCurrentTitle(info.view.title);
-                            setCurrentView(info.view.type);
                         }}
                         events={events.map((event) => ({
                             id: event.id,
