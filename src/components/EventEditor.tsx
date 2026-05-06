@@ -59,7 +59,7 @@ export function EventEditor({
                     />
 
                     <div className="editor-row">
-                        <span className="row-icon">🕒</span>
+                        <span className="row-icon-invisible">📅</span>
 
                         <div className="date-time-section">
                             <label className="all-day-row">
@@ -92,13 +92,16 @@ export function EventEditor({
                                 />
 
                                 {!form.allDay && (
-                                    <input
-                                        type="time"
-                                        value={form.startTime}
-                                        onChange={(event) =>
-                                            onChangeForm({...form, startTime: event.target.value})
-                                        }
-                                    />
+                                    <div className="input-with-icon time-input">
+                                        <input
+                                            type="time"
+                                            value={form.startTime}
+                                            onChange={(event) =>
+                                                onChangeForm({...form, startTime: event.target.value})
+                                            }
+                                        />
+                                        <span className="field-icon" aria-hidden="true">🕒</span>
+                                    </div>
                                 )}
                             </div>
 
@@ -112,13 +115,16 @@ export function EventEditor({
                                 />
 
                                 {!form.allDay && (
-                                    <input
-                                        type="time"
-                                        value={form.endTime}
-                                        onChange={(event) =>
-                                            onChangeForm({...form, endTime: event.target.value})
-                                        }
-                                    />
+                                    <div className="input-with-icon time-input">
+                                        <input
+                                            type="time"
+                                            value={form.endTime}
+                                            onChange={(event) =>
+                                                onChangeForm({...form, endTime: event.target.value})
+                                            }
+                                        />
+                                        <span className="field-icon" aria-hidden="true">🕒</span>
+                                    </div>
                                 )}
                             </div>
                         </div>

@@ -1,0 +1,144 @@
+.fc {
+    height: 100%;
+    color: #202124;
+    font-size: 14px;
+}
+
+.fc .fc-scrollgrid {
+    border: 0;
+}
+
+.fc .fc-scrollgrid-section-header > th {
+    border-right: 0;
+}
+
+.fc .fc-col-header-cell {
+    height: 32px;
+    border-color: #dadce0;
+    background: #fff;
+    color: #3c4043;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.fc .fc-daygrid-day,
+.fc .fc-timegrid-slot,
+.fc .fc-timegrid-axis,
+.fc .fc-timegrid-col {
+    border-color: #dadce0;
+}
+
+.fc .fc-daygrid-day {
+    cursor: pointer;
+}
+
+.fc .fc-daygrid-day-number {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    margin: 4px;
+    padding: 0;
+    border-radius: 50%;
+    color: #3c4043;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.fc .fc-day-today {
+    background: transparent !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number,
+.fc .fc-day-today .fc-timegrid-col-frame::before {
+    background: #1a73e8;
+    color: #fff;
+}
+
+.fc .fc-daygrid-day.fc-day-other {
+    background: #fff;
+}
+
+.fc .fc-daygrid-day.fc-day-other .fc-daygrid-day-number {
+    color: #9aa0a6;
+}
+
+.fc .fc-daygrid-day:hover {
+    background: #f8fafd;
+}
+
+.fc .fc-highlight {
+    background: #e8f0fe;
+}
+
+.fc .fc-timegrid-now-indicator-line {
+    border-color: #ea4335;
+}
+
+.fc .fc-timegrid-now-indicator-arrow {
+    border-color: #ea4335;
+    border-top-color: transparent;
+    border-bottom-color: transparent;
+}
+
+.fc .fc-timegrid-slot-label {
+    color: #70757a;
+    font-size: 11px;
+}
+
+.fc .fc-event {
+    border: 0;
+    border-radius: 6px;
+    background: #1a73e8;
+    color: #fff;
+    cursor: pointer;
+    box-shadow: none;
+}
+
+.fc .fc-event:hover {
+    filter: brightness(0.95);
+}
+
+.fc .fc-daygrid-event {
+    padding: 1px 6px;
+    margin: 1px 6px;
+}
+
+.fc .fc-timegrid-event {
+    padding: 4px 6px;
+}
+
+.event-content {
+    display: flex;
+    min-width: 0;
+    gap: 4px;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
+.fc-timegrid-event .event-content {
+    flex-direction: column;
+    gap: 1px;
+}
+
+.event-time {
+    flex: 0 0 auto;
+    opacity: 0.95;
+    font-size: 12px;
+}
+
+.event-title {
+    overflow: hidden;
+    font-weight: 500;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.event-location {
+    overflow: hidden;
+    opacity: 0.9;
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

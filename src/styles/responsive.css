@@ -1,0 +1,276 @@
+@media (max-width: 1100px) {
+    .brand-title {
+        font-size: 18px;
+    }
+
+    .current-title {
+        font-size: 20px;
+    }
+
+    .top-bar {
+        gap: 12px;
+    }
+}
+
+@media (max-width: 900px) {
+    .top-bar {
+        grid-template-columns: 1fr;
+        height: auto;
+        min-height: 64px;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+
+    .brand-area {
+        grid-column: 1 / -1;
+    }
+
+    .navigation-area {
+        gap: 8px;
+    }
+
+    .today-button {
+        padding: 0 12px;
+    }
+
+    .current-title {
+        font-size: 18px;
+    }
+
+    .calendar-main {
+        padding: 0;
+    }
+}
+
+@media (max-width: 720px) {
+    body {
+        overflow: hidden;
+    }
+
+    .top-bar {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-template-areas:
+      "brand"
+      "nav";
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px;
+        height: auto;
+    }
+
+    .brand-area {
+        grid-area: brand;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .calendar-logo {
+        flex: 0 0 28px;
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        font-size: 13px;
+    }
+
+    .brand-title {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 16px;
+    }
+
+    .navigation-area {
+        grid-area: nav;
+        display: grid;
+        grid-template-columns: auto auto 1fr;
+        align-items: center;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .today-button {
+        height: 34px;
+        padding: 0 10px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .nav-buttons {
+        gap: 2px;
+    }
+
+    .nav-buttons button {
+        width: 32px;
+        height: 32px;
+        font-size: 24px;
+    }
+
+    .current-title {
+        justify-self: start;
+        min-width: 0;
+        overflow: visible;
+        text-overflow: clip;
+        white-space: nowrap;
+        font-size: 16px;
+    }
+
+    .fc {
+        font-size: 12px;
+    }
+
+    .fc .fc-col-header-cell {
+        height: 28px;
+        font-size: 11px;
+    }
+
+    .fc .fc-daygrid-day-number {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .fc .fc-daygrid-event {
+        margin: 1px 2px;
+        padding: 1px 4px;
+    }
+
+    .event-time,
+    .event-location {
+        display: none;
+    }
+
+    .editor-layer {
+        background: #fff;
+    }
+
+    .quick-editor {
+        left: 0 !important;
+        right: 0;
+        bottom: auto;
+        top: 0 !important;
+        width: 100%;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        box-shadow: none;
+        overflow-y: auto;
+    }
+
+    .quick-editor-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        height: 64px;
+        padding: 0 16px;
+        border-bottom: 0;
+        background: #fff;
+    }
+
+    .header-close-button {
+        width: 40px;
+        height: 40px;
+        font-size: 34px;
+    }
+
+    .header-save-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 40px;
+        padding: 0 22px;
+        border: 0;
+        border-radius: 999px;
+        background: #4f6ea9;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    .quick-editor-body {
+        padding: 8px 20px 16px;
+    }
+
+    .title-field {
+        padding-top: 4px;
+        border-bottom: 0;
+        font-size: 20px;
+    }
+
+    .date-time-section {
+        gap: 14px;
+    }
+
+    .all-day-row {
+        min-height: 48px;
+        font-size: 16px;
+    }
+
+    .all-day-row input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        min-height: 20px;
+    }
+
+    .date-time-row {
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .date-time-row input[type="date"],
+    .date-time-row input[type="time"] {
+        appearance: none;
+        -webkit-appearance: none;
+        font-size: 16px;
+    }
+
+    .time-input {
+        width: 92px;
+    }
+
+    .time-input input {
+        text-align: right;
+    }
+
+    .editor-row {
+        grid-template-columns: 28px 1fr;
+        gap: 10px;
+    }
+
+    .editor-row input,
+    .editor-row textarea {
+        min-height: 44px;
+        background: #fff;
+        box-shadow: inset 0 -1px 0 #dadce0;
+        border-radius: 0;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .time-input input {
+        padding-right: 34px;
+    }
+
+    .editor-row textarea {
+        min-height: 60px;
+    }
+
+    .mobile-delete-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 20px;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: #d93025;
+        font-weight: 500;
+    }
+
+    .quick-editor-actions {
+        display: none;
+    }
+}

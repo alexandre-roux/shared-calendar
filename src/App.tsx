@@ -64,7 +64,7 @@ export default function App() {
             endDate: finalEndDate,
             startTime: hasTime ? toTimeInputValue(date) : "",
             endTime: endDate && hasTime ? toTimeInputValue(endDate) : "",
-            allDay: !hasTime,
+            allDay: false,
         });
         setEditorPosition(position);
         setIsEditorOpen(true);
